@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
-#import "DDLog.h"
+#import "CFLog.h"
 
-@class DDLogFileInfo;
+@class CFLogFileInfo;
 
 /**
  * Welcome to Cocoa Lumberjack!
@@ -56,7 +56,7 @@
 // The DDLogFileInfo class is documented below, and provides a handy wrapper that
 // gives you easy access to various file attributes such as the creation date or the file size.
 
-@protocol DDLogFileManager <NSObject>
+@protocol CFLogFileManager <NSObject>
 @required
 
 // Public properties
@@ -113,7 +113,7 @@
  * 
  * Archived log files are automatically deleted according to the maximumNumberOfLogFiles property.
 **/
-@interface DDLogFileManagerDefault : NSObject <DDLogFileManager>
+@interface CFLogFileManagerDefault : NSObject <CFLogFileManager>
 {
 	NSUInteger maximumNumberOfLogFiles;
 	NSString *_logsDirectory;
@@ -154,7 +154,7 @@
  * In addition to the convenience of having a logical default formatter,
  * it will also provide a template that makes it easy for developers to copy and change.
 **/
-@interface DDLogFileFormatterDefault : NSObject <DDLogFormatter>
+@interface CFLogFileFormatterDefault : NSObject <DDLogFormatter>
 {
 	NSDateFormatter *dateFormatter;
 }
@@ -168,11 +168,11 @@
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@interface DDFileLogger : DDAbstractLogger <DDLogger>
+@interface CFFileLogger : CFAbstractLogger <CFLogger>
 {
-	__strong id <DDLogFileManager> logFileManager;
+	__strong id <CFLogFileManager> logFileManager;
 	
-	DDLogFileInfo *currentLogFileInfo;
+	CFLogFileInfo *currentLogFileInfo;
 	NSFileHandle *currentLogFileHandle;
 	
 	dispatch_source_t rollingTimer;
@@ -224,7 +224,7 @@
  * 
  * @see DDLogFileManager.maximumNumberOfLogFiles
 **/
-@property (strong, nonatomic, readonly) id <DDLogFileManager> logFileManager;
+@property (strong, nonatomic, readonly) id <CFLogFileManager> logFileManager;
 
 
 // You can optionally force the current log file to be rolled with this method.
@@ -256,7 +256,7 @@
  * If you absolutely must get updated values,
  * you can invoke the reset method which will clear the cache.
 **/
-@interface DDLogFileInfo : NSObject
+@interface CFLogFileInfo : NSObject
 {
 	__strong NSString *filePath;
 	__strong NSString *fileName;

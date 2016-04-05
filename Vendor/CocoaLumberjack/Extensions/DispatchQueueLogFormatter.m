@@ -125,7 +125,7 @@
 	}
 }
 
-- (NSString *)queueThreadLabelForLogMessage:(DDLogMessage *)logMessage
+- (NSString *)queueThreadLabelForLogMessage:(CFLogMessage *)logMessage
 {
 	// As per the DDLogFormatter contract, this method is always invoked on the same thread/dispatch_queue
 	
@@ -230,7 +230,7 @@
 	}
 }
 
-- (NSString *)formatLogMessage:(DDLogMessage *)logMessage
+- (NSString *)formatLogMessage:(CFLogMessage *)logMessage
 {
 	NSString *timestamp = [self stringFromDate:(logMessage->timestamp)];
 	NSString *queueThreadLabel = [self queueThreadLabelForLogMessage:logMessage];
@@ -238,12 +238,12 @@
 	return [NSString stringWithFormat:@"%@ [%@] %@", timestamp, queueThreadLabel, logMessage->logMsg];
 }
 
-- (void)didAddToLogger:(id <DDLogger>)logger
+- (void)didAddToLogger:(id <CFLogger>)logger
 {
 	OSAtomicIncrement32(&atomicLoggerCount);
 }
 
-- (void)willRemoveFromLogger:(id <DDLogger>)logger
+- (void)willRemoveFromLogger:(id <CFLogger>)logger
 {
 	OSAtomicDecrement32(&atomicLoggerCount);
 }

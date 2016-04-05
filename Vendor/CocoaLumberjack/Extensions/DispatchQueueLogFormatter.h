@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <libkern/OSAtomic.h>
-#import "DDLog.h"
+#import "CFLog.h"
 
 
 /**
@@ -49,7 +49,7 @@
  * Note: If manually creating your own background threads (via NSThread/alloc/init or NSThread/detachNeThread),
  * you can use [[NSThread currentThread] setName:(NSString *)].
 **/
-@interface DispatchQueueLogFormatter : NSObject <DDLogFormatter> {
+@interface DispatchQueueLogFormatter : NSObject <CFLogFormatter> {
 @protected
 	
 	NSString *dateFormatString;

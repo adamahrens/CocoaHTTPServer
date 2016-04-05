@@ -1,4 +1,4 @@
-#import "DDTTYLogger.h"
+#import "CFTTYLogger.h"
 
 #import <unistd.h>
 #import <sys/uio.h>
@@ -86,7 +86,7 @@
 #define MAP_TO_TERMINAL_APP_COLORS 1
 
 
-@interface DDTTYLoggerColorProfile : NSObject {
+@interface CFTTYLoggerColorProfile : NSObject {
 @public
 	int mask;
 	int context;
@@ -123,7 +123,7 @@
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@implementation DDTTYLogger
+@implementation CFTTYLogger
 
 static BOOL isaColorTTY;
 static BOOL isaColor256TTY;
@@ -133,7 +133,7 @@ static NSArray *codes_fg = nil;
 static NSArray *codes_bg = nil;
 static NSArray *colors   = nil;
 
-static DDTTYLogger *sharedInstance;
+static CFTTYLogger *sharedInstance;
 
 /**
  * Initializes the colors array, as well as the codes_fg and codes_bg arrays, for 16 color mode.
@@ -801,11 +801,11 @@ static DDTTYLogger *sharedInstance;
 		NSLogInfo(@"DDTTYLogger: isaColor256TTY: %@", (isaColor256TTY ? @"YES" : @"NO"));
 		NSLogInfo(@"DDTTYLogger: isaXcodeColorTTY: %@", (isaXcodeColorTTY ? @"YES" : @"NO"));
 		
-		sharedInstance = [[DDTTYLogger alloc] init];
+		sharedInstance = [[CFTTYLogger alloc] init];
 	}
 }
 
-+ (DDTTYLogger *)sharedInstance
++ (CFTTYLogger *)sharedInstance
 {
 	return sharedInstance;
 }
@@ -930,8 +930,8 @@ static DDTTYLogger *sharedInstance;
 {
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
-		DDTTYLoggerColorProfile *newColorProfile =
-		    [[DDTTYLoggerColorProfile alloc] initWithForegroundColor:txtColor
+		CFTTYLoggerColorProfile *newColorProfile =
+		    [[CFTTYLoggerColorProfile alloc] initWithForegroundColor:txtColor
 		                                             backgroundColor:bgColor
 		                                                        flag:mask
 		                                                     context:ctxt];
@@ -939,7 +939,7 @@ static DDTTYLogger *sharedInstance;
 		NSLogInfo(@"DDTTYLogger: newColorProfile: %@", newColorProfile);
 		
 		NSUInteger i = 0;
-		for (DDTTYLoggerColorProfile *colorProfile in colorProfilesArray)
+		for (CFTTYLoggerColorProfile *colorProfile in colorProfilesArray)
 		{
 			if ((colorProfile->mask == mask) && (colorProfile->context == ctxt))
 			{
@@ -979,8 +979,8 @@ static DDTTYLogger *sharedInstance;
 	
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
-		DDTTYLoggerColorProfile *newColorProfile =
-		    [[DDTTYLoggerColorProfile alloc] initWithForegroundColor:txtColor
+		CFTTYLoggerColorProfile *newColorProfile =
+		    [[CFTTYLoggerColorProfile alloc] initWithForegroundColor:txtColor
 		                                             backgroundColor:bgColor
 		                                                        flag:0
 		                                                     context:0];
@@ -1018,7 +1018,7 @@ static DDTTYLogger *sharedInstance;
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		NSUInteger i = 0;
-		for (DDTTYLoggerColorProfile *colorProfile in colorProfilesArray)
+		for (CFTTYLoggerColorProfile *colorProfile in colorProfilesArray)
 		{
 			if ((colorProfile->mask == mask) && (colorProfile->context == context))
 			{
@@ -1155,7 +1155,7 @@ static DDTTYLogger *sharedInstance;
 	}
 }
 
-- (void)logMessage:(DDLogMessage *)logMessage
+- (void)logMessage:(CFLogMessage *)logMessage
 {
 	NSString *logMsg = logMessage->logMsg;
 	BOOL isFormatted = NO;
@@ -1170,7 +1170,7 @@ static DDTTYLogger *sharedInstance;
 	{
 		// Search for a color profile associated with the log message
 		
-		DDTTYLoggerColorProfile *colorProfile = nil;
+		CFTTYLoggerColorProfile *colorProfile = nil;
 		
 		if (colorsEnabled)
 		{
@@ -1180,7 +1180,7 @@ static DDTTYLogger *sharedInstance;
 			}
 			if (colorProfile == nil)
 			{
-				for (DDTTYLoggerColorProfile *cp in colorProfilesArray)
+				for (CFTTYLoggerColorProfile *cp in colorProfilesArray)
 				{
 					if ((logMessage->logFlag & cp->mask) && (logMessage->logContext == cp->context))
 					{
@@ -1356,7 +1356,7 @@ static DDTTYLogger *sharedInstance;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@implementation DDTTYLoggerColorProfile
+@implementation CFTTYLoggerColorProfile
 
 - (id)initWithForegroundColor:(OSColor *)fgColor backgroundColor:(OSColor *)bgColor flag:(int)aMask context:(int)ctxt
 {
@@ -1369,7 +1369,7 @@ static DDTTYLogger *sharedInstance;
 		
 		if (fgColor)
 		{
-			[DDTTYLogger getRed:&r green:&g blue:&b fromColor:fgColor];
+			[CFTTYLogger getRed:&r green:&g blue:&b fromColor:fgColor];
 			
 			fg_r = (uint8_t)(r * 255.0f);
 			fg_g = (uint8_t)(g * 255.0f);
@@ -1377,7 +1377,7 @@ static DDTTYLogger *sharedInstance;
 		}
 		if (bgColor)
 		{
-			[DDTTYLogger getRed:&r green:&g blue:&b fromColor:bgColor];
+			[CFTTYLogger getRed:&r green:&g blue:&b fromColor:bgColor];
 			
 			bg_r = (uint8_t)(r * 255.0f);
 			bg_g = (uint8_t)(g * 255.0f);
@@ -1388,7 +1388,7 @@ static DDTTYLogger *sharedInstance;
 		{
 			// Map foreground color to closest available shell color
 			
-			fgCodeIndex = [DDTTYLogger codeIndexForColor:fgColor];
+			fgCodeIndex = [CFTTYLogger codeIndexForColor:fgColor];
 			fgCodeRaw   = [codes_fg objectAtIndex:fgCodeIndex];
 			
 			NSString *escapeSeq = @"\033[";
@@ -1422,7 +1422,7 @@ static DDTTYLogger *sharedInstance;
 		{
 			// Map background color to closest available shell color
 			
-			bgCodeIndex = [DDTTYLogger codeIndexForColor:bgColor];
+			bgCodeIndex = [CFTTYLogger codeIndexForColor:bgColor];
 			bgCodeRaw   = [codes_bg objectAtIndex:bgCodeIndex];
 			
 			NSString *escapeSeq = @"\033[";

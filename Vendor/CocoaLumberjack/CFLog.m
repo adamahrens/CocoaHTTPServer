@@ -1,4 +1,4 @@
-#import "DDLog.h"
+#import "CFLog.h"
 
 #import <pthread.h>
 #import <objc/runtime.h>
@@ -55,23 +55,23 @@
 static void *const GlobalLoggingQueueIdentityKey = (void *)&GlobalLoggingQueueIdentityKey;
 
 
-@interface DDLoggerNode : NSObject {
+@interface CFLoggerNode : NSObject {
 @public 
-	id <DDLogger> logger;	
+	id <CFLogger> logger;
 	dispatch_queue_t loggerQueue;
 }
 
-+ (DDLoggerNode *)nodeWithLogger:(id <DDLogger>)logger loggerQueue:(dispatch_queue_t)loggerQueue;
++ (CFLoggerNode *)nodeWithLogger:(id <CFLogger>)logger loggerQueue:(dispatch_queue_t)loggerQueue;
 
 @end
 
 
-@interface DDLog (PrivateAPI)
+@interface CFLog (PrivateAPI)
 
-+ (void)lt_addLogger:(id <DDLogger>)logger;
-+ (void)lt_removeLogger:(id <DDLogger>)logger;
++ (void)lt_addLogger:(id <CFLogger>)logger;
++ (void)lt_removeLogger:(id <CFLogger>)logger;
 + (void)lt_removeAllLoggers;
-+ (void)lt_log:(DDLogMessage *)logMessage;
++ (void)lt_log:(CFLogMessage *)logMessage;
 + (void)lt_flush;
 
 @end
@@ -80,7 +80,7 @@ static void *const GlobalLoggingQueueIdentityKey = (void *)&GlobalLoggingQueueId
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@implementation DDLog
+@implementation CFLog
 
 // An array used to manage all the individual loggers.
 // The array is only modified on the loggingQueue/loggingThread.
@@ -178,7 +178,7 @@ static unsigned int numProcessors;
 #pragma mark Logger Management
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-+ (void)addLogger:(id <DDLogger>)logger
++ (void)addLogger:(id <CFLogger>)logger
 {
 	if (logger == nil) return;
 		
@@ -188,7 +188,7 @@ static unsigned int numProcessors;
 	}});
 }
 
-+ (void)removeLogger:(id <DDLogger>)logger
++ (void)removeLogger:(id <CFLogger>)logger
 {
 	if (logger == nil) return;
 	
@@ -210,7 +210,7 @@ static unsigned int numProcessors;
 #pragma mark Master Logging
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-+ (void)queueLogMessage:(DDLogMessage *)logMessage asynchronously:(BOOL)asyncFlag
++ (void)queueLogMessage:(CFLogMessage *)logMessage asynchronously:(BOOL)asyncFlag
 {
 	// We have a tricky situation here...
 	// 
@@ -282,7 +282,7 @@ static unsigned int numProcessors;
 		va_start(args, format);
 		
 		NSString *logMsg = [[NSString alloc] initWithFormat:format arguments:args];
-		DDLogMessage *logMessage = [[DDLogMessage alloc] initWithLogMsg:logMsg
+		CFLogMessage *logMessage = [[CFLogMessage alloc] initWithLogMsg:logMsg
 		                                                          level:level
 		                                                           flag:flag
 		                                                        context:context
@@ -312,7 +312,7 @@ static unsigned int numProcessors;
 	if (format)
 	{
 		NSString *logMsg = [[NSString alloc] initWithFormat:format arguments:args];
-		DDLogMessage *logMessage = [[DDLogMessage alloc] initWithLogMsg:logMsg
+		CFLogMessage *logMessage = [[CFLogMessage alloc] initWithLogMsg:logMsg
 		                                                          level:level
 		                                                           flag:flag
 		                                                        context:context
@@ -503,7 +503,7 @@ static unsigned int numProcessors;
 /**
  * This method should only be run on the logging thread/queue.
 **/
-+ (void)lt_addLogger:(id <DDLogger>)logger
++ (void)lt_addLogger:(id <CFLogger>)logger
 {
 	// Add to loggers array.
 	// Need to create loggerQueue if loggerNode doesn't provide one.
@@ -531,7 +531,7 @@ static unsigned int numProcessors;
 		loggerQueue = dispatch_queue_create(loggerQueueName, NULL);
 	}
 	
-	DDLoggerNode *loggerNode = [DDLoggerNode nodeWithLogger:logger loggerQueue:loggerQueue];
+	CFLoggerNode *loggerNode = [CFLoggerNode nodeWithLogger:logger loggerQueue:loggerQueue];
 	[loggers addObject:loggerNode];
 	
 	if ([logger respondsToSelector:@selector(didAddLogger)])
@@ -546,13 +546,13 @@ static unsigned int numProcessors;
 /**
  * This method should only be run on the logging thread/queue.
 **/
-+ (void)lt_removeLogger:(id <DDLogger>)logger
++ (void)lt_removeLogger:(id <CFLogger>)logger
 {
 	// Find associated loggerNode in list of added loggers
 	
-	DDLoggerNode *loggerNode = nil;
+	CFLoggerNode *loggerNode = nil;
 	
-	for (DDLoggerNode *node in loggers)
+	for (CFLoggerNode *node in loggers)
 	{
 		if (node->logger == logger)
 		{
@@ -589,7 +589,7 @@ static unsigned int numProcessors;
 {
 	// Notify all loggers
 	
-	for (DDLoggerNode *loggerNode in loggers)
+	for (CFLoggerNode *loggerNode in loggers)
 	{
 		if ([loggerNode->logger respondsToSelector:@selector(willRemoveLogger)])
 		{
@@ -608,7 +608,7 @@ static unsigned int numProcessors;
 /**
  * This method should only be run on the logging thread/queue.
 **/
-+ (void)lt_log:(DDLogMessage *)logMessage
++ (void)lt_log:(CFLogMessage *)logMessage
 {
 	// Execute the given log message on each of our loggers.
 		
@@ -621,7 +621,7 @@ static unsigned int numProcessors;
 		// The waiting ensures that a slow logger doesn't end up with a large queue of pending log messages.
 		// This would defeat the purpose of the efforts we made earlier to restrict the max queue size.
 		
-		for (DDLoggerNode *loggerNode in loggers)
+		for (CFLoggerNode *loggerNode in loggers)
 		{
 			dispatch_group_async(loggingGroup, loggerNode->loggerQueue, ^{ @autoreleasepool {
 				
@@ -636,7 +636,7 @@ static unsigned int numProcessors;
 	{
 		// Execute each logger serialy, each within its own queue.
 		
-		for (DDLoggerNode *loggerNode in loggers)
+		for (CFLoggerNode *loggerNode in loggers)
 		{
 			dispatch_sync(loggerNode->loggerQueue, ^{ @autoreleasepool {
 				
@@ -673,7 +673,7 @@ static unsigned int numProcessors;
 	// Now we need to propogate the flush request to any loggers that implement the flush method.
 	// This is designed for loggers that buffer IO.
 		
-	for (DDLoggerNode *loggerNode in loggers)
+	for (CFLoggerNode *loggerNode in loggers)
 	{
 		if ([loggerNode->logger respondsToSelector:@selector(flush)])
 		{
@@ -770,9 +770,9 @@ NSString *DDExtractFileNameWithoutExtension(const char *filePath, BOOL copy)
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@implementation DDLoggerNode
+@implementation CFLoggerNode
 
-- (id)initWithLogger:(id <DDLogger>)aLogger loggerQueue:(dispatch_queue_t)aLoggerQueue
+- (id)initWithLogger:(id <CFLogger>)aLogger loggerQueue:(dispatch_queue_t)aLoggerQueue
 {
 	if ((self = [super init]))
 	{
@@ -788,9 +788,9 @@ NSString *DDExtractFileNameWithoutExtension(const char *filePath, BOOL copy)
 	return self;
 }
 
-+ (DDLoggerNode *)nodeWithLogger:(id <DDLogger>)logger loggerQueue:(dispatch_queue_t)loggerQueue
++ (CFLoggerNode *)nodeWithLogger:(id <CFLogger>)logger loggerQueue:(dispatch_queue_t)loggerQueue
 {
-	return [[DDLoggerNode alloc] initWithLogger:logger loggerQueue:loggerQueue];
+	return [[CFLoggerNode alloc] initWithLogger:logger loggerQueue:loggerQueue];
 }
 
 - (void)dealloc
@@ -806,7 +806,7 @@ NSString *DDExtractFileNameWithoutExtension(const char *filePath, BOOL copy)
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@implementation DDLogMessage
+@implementation CFLogMessage
 
 static char *dd_str_copy(const char *str)
 {
@@ -828,7 +828,7 @@ static char *dd_str_copy(const char *str)
             function:(const char *)aFunction
                 line:(int)line
                  tag:(id)aTag
-             options:(DDLogMessageOptions)optionsMask
+             options:(CFLogMessageOptions)optionsMask
 {
 	if ((self = [super init]))
 	{
@@ -914,7 +914,7 @@ static char *dd_str_copy(const char *str)
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@implementation DDAbstractLogger
+@implementation CFAbstractLogger
 
 - (id)init
 {
@@ -957,12 +957,12 @@ static char *dd_str_copy(const char *str)
 	#endif
 }
 
-- (void)logMessage:(DDLogMessage *)logMessage
+- (void)logMessage:(CFLogMessage *)logMessage
 {
 	// Override me
 }
 
-- (id <DDLogFormatter>)logFormatter
+- (id <CFLogFormatter>)logFormatter
 {
 	// This method must be thread safe and intuitive.
 	// Therefore if somebody executes the following code:
@@ -1018,7 +1018,7 @@ static char *dd_str_copy(const char *str)
 	
 	dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
 	
-	__block id <DDLogFormatter> result;
+	__block id <CFLogFormatter> result;
 	
 	dispatch_sync(globalLoggingQueue, ^{
 		dispatch_sync(loggerQueue, ^{
@@ -1029,7 +1029,7 @@ static char *dd_str_copy(const char *str)
 	return result;
 }
 
-- (void)setLogFormatter:(id <DDLogFormatter>)logFormatter
+- (void)setLogFormatter:(id <CFLogFormatter>)logFormatter
 {
 	// The design of this method is documented extensively in the logFormatter message (above in code).
 	

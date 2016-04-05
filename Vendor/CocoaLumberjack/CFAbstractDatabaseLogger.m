@@ -1,4 +1,4 @@
-#import "DDAbstractDatabaseLogger.h"
+#import "CFAbstractDatabaseLogger.h"
 #import <math.h>
 
 /**
@@ -15,14 +15,14 @@
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
 #endif
 
-@interface DDAbstractDatabaseLogger ()
+@interface CFAbstractDatabaseLogger ()
 - (void)destroySaveTimer;
 - (void)destroyDeleteTimer;
 @end
 
 #pragma mark -
 
-@implementation DDAbstractDatabaseLogger
+@implementation CFAbstractDatabaseLogger
 
 - (id)init
 {
@@ -47,7 +47,7 @@
 #pragma mark Override Me
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (BOOL)db_log:(DDLogMessage *)logMessage
+- (BOOL)db_log:(CFLogMessage *)logMessage
 {
 	// Override me and add your implementation.
 	// 
@@ -149,7 +149,7 @@
 {
 	if ((saveTimer == NULL) && (saveInterval > 0.0))
 	{
-		saveTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, loggerQueue);
+		saveTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, _loggerQueue);
 		
 		dispatch_source_set_event_handler(saveTimer, ^{ @autoreleasepool {
 			
@@ -193,7 +193,7 @@
 {
 	if ((deleteTimer == NULL) && (deleteInterval > 0.0) && (maxAge > 0.0))
 	{
-		deleteTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, loggerQueue);
+		deleteTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, _loggerQueue);
 
         if (deleteTimer != NULL) {
             dispatch_source_set_event_handler(deleteTimer, ^{ @autoreleasepool {
@@ -228,12 +228,12 @@
 	NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
 	NSAssert(![self isOnInternalLoggerQueue], @"MUST access ivar directly, NOT via self.* syntax.");
 	
-	dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+	dispatch_queue_t globalLoggingQueue = [CFLog loggingQueue];
 	
 	__block NSUInteger result;
 	
 	dispatch_sync(globalLoggingQueue, ^{
-		dispatch_sync(loggerQueue, ^{
+		dispatch_sync(_loggerQueue, ^{
 			result = saveThreshold;
 		});
 	});
@@ -274,7 +274,7 @@
 		NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
 		
 		dispatch_async(globalLoggingQueue, ^{
-			dispatch_async(loggerQueue, block);
+			dispatch_async(_loggerQueue, block);
 		});
 	}
 }
@@ -299,7 +299,7 @@
 	__block NSTimeInterval result;
 	
 	dispatch_sync(globalLoggingQueue, ^{
-		dispatch_sync(loggerQueue, ^{
+		dispatch_sync(_loggerQueue, ^{
 			result = saveInterval;
 		});
 	});
@@ -372,11 +372,11 @@
 	}
 	else
 	{
-		dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+		dispatch_queue_t globalLoggingQueue = [CFLog loggingQueue];
 		NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
 		
 		dispatch_async(globalLoggingQueue, ^{
-			dispatch_async(loggerQueue, block);
+			dispatch_async(_loggerQueue, block);
 		});
 	}
 }
@@ -396,12 +396,12 @@
 	NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
 	NSAssert(![self isOnInternalLoggerQueue], @"MUST access ivar directly, NOT via self.* syntax.");
 	
-	dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+	dispatch_queue_t globalLoggingQueue = [CFLog loggingQueue];
 	
 	__block NSTimeInterval result;
 	
 	dispatch_sync(globalLoggingQueue, ^{
-		dispatch_sync(loggerQueue, ^{
+		dispatch_sync(_loggerQueue, ^{
 			result = maxAge;
 		});
 	});
@@ -484,7 +484,7 @@
 		NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
 		
 		dispatch_async(globalLoggingQueue, ^{
-			dispatch_async(loggerQueue, block);
+			dispatch_async(_loggerQueue, block);
 		});
 	}
 }
@@ -509,7 +509,7 @@
 	__block NSTimeInterval result;
 	
 	dispatch_sync(globalLoggingQueue, ^{
-		dispatch_sync(loggerQueue, ^{
+		dispatch_sync(_loggerQueue, ^{
 			result = deleteInterval;
 		});
 	});
@@ -585,7 +585,7 @@
 		NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
 		
 		dispatch_async(globalLoggingQueue, ^{
-			dispatch_async(loggerQueue, block);
+			dispatch_async(_loggerQueue, block);
 		});
 	}
 }
@@ -610,7 +610,7 @@
 	__block BOOL result;
 	
 	dispatch_sync(globalLoggingQueue, ^{
-		dispatch_sync(loggerQueue, ^{
+		dispatch_sync(_loggerQueue, ^{
 			result = deleteOnEverySave;
 		});
 	});
@@ -638,7 +638,7 @@
 		NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
 		
 		dispatch_async(globalLoggingQueue, ^{
-			dispatch_async(loggerQueue, block);
+			dispatch_async(_loggerQueue, block);
 		});
 	}
 }
@@ -657,7 +657,7 @@
 	if ([self isOnInternalLoggerQueue])
 		block();
 	else
-		dispatch_async(loggerQueue, block);
+		dispatch_async(_loggerQueue, block);
 }
 
 - (void)deleteOldLogEntries
@@ -670,7 +670,7 @@
 	if ([self isOnInternalLoggerQueue])
 		block();
 	else
-		dispatch_async(loggerQueue, block);
+		dispatch_async(_loggerQueue, block);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -696,7 +696,7 @@
 	[self destroyDeleteTimer];
 }
 
-- (void)logMessage:(DDLogMessage *)logMessage
+- (void)logMessage:(CFLogMessage *)logMessage
 {
 	if ([self db_log:logMessage])
 	{

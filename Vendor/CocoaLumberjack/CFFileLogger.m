@@ -1,4 +1,4 @@
-#import "DDFileLogger.h"
+#import "CFFileLogger.h"
 
 #import <unistd.h>
 #import <sys/attr.h>
@@ -33,14 +33,14 @@
 #define NSLogInfo(frmt, ...)     do{ if(LOG_LEVEL >= 3) NSLog((frmt), ##__VA_ARGS__); } while(0)
 #define NSLogVerbose(frmt, ...)  do{ if(LOG_LEVEL >= 4) NSLog((frmt), ##__VA_ARGS__); } while(0)
 
-@interface DDLogFileManagerDefault (PrivateAPI)
+@interface CFLogFileManagerDefault (PrivateAPI)
 
 - (void)deleteOldLogFiles;
 - (NSString *)defaultLogsDirectory;
 
 @end
 
-@interface DDFileLogger (PrivateAPI)
+@interface CFFileLogger (PrivateAPI)
 
 - (void)rollLogFileNow;
 - (void)maybeRollLogFileDueToAge;
@@ -52,7 +52,7 @@
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@implementation DDLogFileManagerDefault
+@implementation CFLogFileManagerDefault
 
 @synthesize maximumNumberOfLogFiles;
 
@@ -109,7 +109,7 @@
 	{
 		NSLogInfo(@"DDFileLogManagerDefault: Responding to configuration change: maximumNumberOfLogFiles");
 		
-		dispatch_async([DDLog loggingQueue], ^{ @autoreleasepool {
+		dispatch_async([CFLog loggingQueue], ^{ @autoreleasepool {
 			
 			[self deleteOldLogFiles];
 		}});
@@ -146,7 +146,7 @@
 	
 	if (count > 0)
 	{
-		DDLogFileInfo *logFileInfo = [sortedLogFileInfos objectAtIndex:0];
+		CFLogFileInfo *logFileInfo = [sortedLogFileInfos objectAtIndex:0];
 		
 		if (!logFileInfo.isArchived)
 		{
@@ -168,7 +168,7 @@
 	NSUInteger i;
 	for (i = maxNumLogFiles; i < count; i++)
 	{
-		DDLogFileInfo *logFileInfo = [sortedArchivedLogFileInfos objectAtIndex:i];
+		CFLogFileInfo *logFileInfo = [sortedArchivedLogFileInfos objectAtIndex:i];
 		
 		NSLogInfo(@"DDLogFileManagerDefault: Deleting file: %@", logFileInfo.fileName);
 		
@@ -304,7 +304,7 @@
 	
 	for (NSString *filePath in unsortedLogFilePaths)
 	{
-		DDLogFileInfo *logFileInfo = [[DDLogFileInfo alloc] initWithFilePath:filePath];
+		CFLogFileInfo *logFileInfo = [[CFLogFileInfo alloc] initWithFilePath:filePath];
 		
 		[unsortedLogFileInfos addObject:logFileInfo];
 	}
@@ -323,7 +323,7 @@
 	
 	NSMutableArray *sortedLogFilePaths = [NSMutableArray arrayWithCapacity:[sortedLogFileInfos count]];
 	
-	for (DDLogFileInfo *logFileInfo in sortedLogFileInfos)
+	for (CFLogFileInfo *logFileInfo in sortedLogFileInfos)
 	{
 		[sortedLogFilePaths addObject:[logFileInfo filePath]];
 	}
@@ -342,7 +342,7 @@
 	
 	NSMutableArray *sortedLogFileNames = [NSMutableArray arrayWithCapacity:[sortedLogFileInfos count]];
 	
-	for (DDLogFileInfo *logFileInfo in sortedLogFileInfos)
+	for (CFLogFileInfo *logFileInfo in sortedLogFileInfos)
 	{
 		[sortedLogFileNames addObject:[logFileInfo fileName]];
 	}
@@ -416,7 +416,7 @@
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@implementation DDLogFileFormatterDefault
+@implementation CFLogFileFormatterDefault
 
 - (id)init
 {
@@ -441,7 +441,7 @@
 	return self;
 }
 
-- (NSString *)formatLogMessage:(DDLogMessage *)logMessage
+- (NSString *)formatLogMessage:(CFLogMessage *)logMessage
 {
 	NSString *dateAndTime = [dateFormatter stringFromDate:(logMessage->timestamp)];
 	
@@ -454,16 +454,16 @@
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@implementation DDFileLogger
+@implementation CFFileLogger
 
 - (id)init
 {
-	DDLogFileManagerDefault *defaultLogFileManager = [[DDLogFileManagerDefault alloc] init];
+	CFLogFileManagerDefault *defaultLogFileManager = [[CFLogFileManagerDefault alloc] init];
 	
 	return [self initWithLogFileManager:defaultLogFileManager];
 }
 
-- (id)initWithLogFileManager:(id <DDLogFileManager>)aLogFileManager
+- (id)initWithLogFileManager:(id <CFLogFileManager>)aLogFileManager
 {
 	if ((self = [super init]))
 	{
@@ -472,7 +472,7 @@
 		
 		logFileManager = aLogFileManager;
 		
-		formatter = [[DDLogFileFormatterDefault alloc] init];
+		formatter = [[CFLogFileFormatterDefault alloc] init];
 	}
 	return self;
 }
@@ -764,7 +764,7 @@
  * 
  * Otherwise a new file is created and returned.
 **/
-- (DDLogFileInfo *)currentLogFileInfo
+- (CFLogFileInfo *)currentLogFileInfo
 {
 	if (currentLogFileInfo == nil)
 	{
@@ -772,7 +772,7 @@
 		
 		if ([sortedLogFileInfos count] > 0)
 		{
-			DDLogFileInfo *mostRecentLogFileInfo = [sortedLogFileInfos objectAtIndex:0];
+			CFLogFileInfo *mostRecentLogFileInfo = [sortedLogFileInfos objectAtIndex:0];
 			
 			BOOL useExistingLogFile = YES;
 			BOOL shouldArchiveMostRecent = NO;
@@ -817,7 +817,7 @@
 		{
 			NSString *currentLogFilePath = [logFileManager createNewLogFile];
 			
-			currentLogFileInfo = [[DDLogFileInfo alloc] initWithFilePath:currentLogFilePath];
+			currentLogFileInfo = [[CFLogFileInfo alloc] initWithFilePath:currentLogFilePath];
 		}
 	}
 	
@@ -846,7 +846,7 @@
 #pragma mark DDLogger Protocol
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)logMessage:(DDLogMessage *)logMessage
+- (void)logMessage:(CFLogMessage *)logMessage
 {
 	NSString *logMsg = logMessage->logMsg;
 	
@@ -894,7 +894,7 @@
   #define XATTR_ARCHIVED_NAME  @"lumberjack.log.archived"
 #endif
 
-@implementation DDLogFileInfo
+@implementation CFLogFileInfo
 
 @synthesize filePath;
 

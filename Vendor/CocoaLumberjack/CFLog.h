@@ -33,17 +33,17 @@
 **/
 
 
-@class DDLogMessage;
+@class CFLogMessage;
 
-@protocol DDLogger;
-@protocol DDLogFormatter;
+@protocol CFLogger;
+@protocol CFLogFormatter;
 
 /**
  * This is the single macro that all other macros below compile into.
  * This big multiline macro makes all the other macros easier to read.
 **/
 
-#define LOG_MACRO(isAsynchronous, lvl, flg, ctx, atag, fnct, frmt, ...) \
+#define LOG_MACRO_CF(isAsynchronous, lvl, flg, ctx, atag, fnct, frmt, ...) \
   [DDLog log:isAsynchronous                                             \
        level:lvl                                                        \
         flag:flg                                                        \
@@ -61,23 +61,23 @@
  * We also define shorthand versions for asynchronous and synchronous logging.
 **/
 
-#define LOG_OBJC_MACRO(async, lvl, flg, ctx, frmt, ...) \
-             LOG_MACRO(async, lvl, flg, ctx, nil, sel_getName(_cmd), frmt, ##__VA_ARGS__)
+#define LOG_OBJC_MACRO_CF(async, lvl, flg, ctx, frmt, ...) \
+             LOG_MACRO_CF(async, lvl, flg, ctx, nil, sel_getName(_cmd), frmt, ##__VA_ARGS__)
 
-#define LOG_C_MACRO(async, lvl, flg, ctx, frmt, ...) \
-          LOG_MACRO(async, lvl, flg, ctx, nil, __FUNCTION__, frmt, ##__VA_ARGS__)
+#define LOG_C_MACRO_CF(async, lvl, flg, ctx, frmt, ...) \
+          LOG_MACRO_CF(async, lvl, flg, ctx, nil, __FUNCTION__, frmt, ##__VA_ARGS__)
 
-#define  SYNC_LOG_OBJC_MACRO(lvl, flg, ctx, frmt, ...) \
-              LOG_OBJC_MACRO( NO, lvl, flg, ctx, frmt, ##__VA_ARGS__)
+#define SYNC_LOG_OBJC_MACRO_CF(lvl, flg, ctx, frmt, ...) \
+              LOG_OBJC_MACRO_CF( NO, lvl, flg, ctx, frmt, ##__VA_ARGS__)
 
-#define ASYNC_LOG_OBJC_MACRO(lvl, flg, ctx, frmt, ...) \
-              LOG_OBJC_MACRO(YES, lvl, flg, ctx, frmt, ##__VA_ARGS__)
+#define ASYNC_LOG_OBJC_MACRO_CF(lvl, flg, ctx, frmt, ...) \
+              LOG_OBJC_MACRO_CF(YES, lvl, flg, ctx, frmt, ##__VA_ARGS__)
 
-#define  SYNC_LOG_C_MACRO(lvl, flg, ctx, frmt, ...) \
-              LOG_C_MACRO( NO, lvl, flg, ctx, frmt, ##__VA_ARGS__)
+#define  SYNC_LOG_C_MACRO_CF(lvl, flg, ctx, frmt, ...) \
+              LOG_C_MACRO_CF( NO, lvl, flg, ctx, frmt, ##__VA_ARGS__)
 
-#define ASYNC_LOG_C_MACRO(lvl, flg, ctx, frmt, ...) \
-              LOG_C_MACRO(YES, lvl, flg, ctx, frmt, ##__VA_ARGS__)
+#define ASYNC_LOG_C_MACRO_CF(lvl, flg, ctx, frmt, ...) \
+              LOG_C_MACRO_CF(YES, lvl, flg, ctx, frmt, ##__VA_ARGS__)
 
 /**
  * Define version of the macro that only execute if the logLevel is above the threshold.
@@ -97,14 +97,14 @@
  * We also define shorthand versions for asynchronous and synchronous logging.
 **/
 
-#define LOG_MAYBE(async, lvl, flg, ctx, fnct, frmt, ...) \
+#define LOG_MAYBE_CF(async, lvl, flg, ctx, fnct, frmt, ...) \
   do { if(lvl & flg) LOG_MACRO(async, lvl, flg, ctx, nil, fnct, frmt, ##__VA_ARGS__); } while(0)
 
 #define LOG_OBJC_MAYBE(async, lvl, flg, ctx, frmt, ...) \
-             LOG_MAYBE(async, lvl, flg, ctx, sel_getName(_cmd), frmt, ##__VA_ARGS__)
+             LOG_MAYBE_CF(async, lvl, flg, ctx, sel_getName(_cmd), frmt, ##__VA_ARGS__)
 
 #define LOG_C_MAYBE(async, lvl, flg, ctx, frmt, ...) \
-          LOG_MAYBE(async, lvl, flg, ctx, __FUNCTION__, frmt, ##__VA_ARGS__)
+          LOG_MAYBE_CF(async, lvl, flg, ctx, __FUNCTION__, frmt, ##__VA_ARGS__)
 
 #define  SYNC_LOG_OBJC_MAYBE(lvl, flg, ctx, frmt, ...) \
               LOG_OBJC_MAYBE( NO, lvl, flg, ctx, frmt, ##__VA_ARGS__)
@@ -221,22 +221,22 @@
 #define LOG_INFO    (ddLogLevel & LOG_FLAG_INFO)
 #define LOG_VERBOSE (ddLogLevel & LOG_FLAG_VERBOSE)
 
-#define LOG_ASYNC_ENABLED YES
+#define LOG_ASYNC_ENABLED_CF YES
 
 #define LOG_ASYNC_ERROR   ( NO && LOG_ASYNC_ENABLED)
 #define LOG_ASYNC_WARN    (YES && LOG_ASYNC_ENABLED)
 #define LOG_ASYNC_INFO    (YES && LOG_ASYNC_ENABLED)
 #define LOG_ASYNC_VERBOSE (YES && LOG_ASYNC_ENABLED)
 
-#define DDLogError(frmt, ...)   LOG_OBJC_MAYBE(LOG_ASYNC_ERROR,   ddLogLevel, LOG_FLAG_ERROR,   0, frmt, ##__VA_ARGS__)
-#define DDLogWarn(frmt, ...)    LOG_OBJC_MAYBE(LOG_ASYNC_WARN,    ddLogLevel, LOG_FLAG_WARN,    0, frmt, ##__VA_ARGS__)
-#define DDLogInfo(frmt, ...)    LOG_OBJC_MAYBE(LOG_ASYNC_INFO,    ddLogLevel, LOG_FLAG_INFO,    0, frmt, ##__VA_ARGS__)
-#define DDLogVerbose(frmt, ...) LOG_OBJC_MAYBE(LOG_ASYNC_VERBOSE, ddLogLevel, LOG_FLAG_VERBOSE, 0, frmt, ##__VA_ARGS__)
+#define CFLogError(frmt, ...)   LOG_OBJC_MAYBE(LOG_ASYNC_ERROR,   ddLogLevel, LOG_FLAG_ERROR,   0, frmt, ##__VA_ARGS__)
+#define CFLogWarn(frmt, ...)    LOG_OBJC_MAYBE(LOG_ASYNC_WARN,    ddLogLevel, LOG_FLAG_WARN,    0, frmt, ##__VA_ARGS__)
+#define CFLogInfo(frmt, ...)    LOG_OBJC_MAYBE(LOG_ASYNC_INFO,    ddLogLevel, LOG_FLAG_INFO,    0, frmt, ##__VA_ARGS__)
+#define CFLogVerbose(frmt, ...) LOG_OBJC_MAYBE(LOG_ASYNC_VERBOSE, ddLogLevel, LOG_FLAG_VERBOSE, 0, frmt, ##__VA_ARGS__)
 
-#define DDLogCError(frmt, ...)   LOG_C_MAYBE(LOG_ASYNC_ERROR,   ddLogLevel, LOG_FLAG_ERROR,   0, frmt, ##__VA_ARGS__)
-#define DDLogCWarn(frmt, ...)    LOG_C_MAYBE(LOG_ASYNC_WARN,    ddLogLevel, LOG_FLAG_WARN,    0, frmt, ##__VA_ARGS__)
-#define DDLogCInfo(frmt, ...)    LOG_C_MAYBE(LOG_ASYNC_INFO,    ddLogLevel, LOG_FLAG_INFO,    0, frmt, ##__VA_ARGS__)
-#define DDLogCVerbose(frmt, ...) LOG_C_MAYBE(LOG_ASYNC_VERBOSE, ddLogLevel, LOG_FLAG_VERBOSE, 0, frmt, ##__VA_ARGS__)
+#define CFLogCError(frmt, ...)   LOG_C_MAYBE(LOG_ASYNC_ERROR,   ddLogLevel, LOG_FLAG_ERROR,   0, frmt, ##__VA_ARGS__)
+#define CFLogCWarn(frmt, ...)    LOG_C_MAYBE(LOG_ASYNC_WARN,    ddLogLevel, LOG_FLAG_WARN,    0, frmt, ##__VA_ARGS__)
+#define CFLogCInfo(frmt, ...)    LOG_C_MAYBE(LOG_ASYNC_INFO,    ddLogLevel, LOG_FLAG_INFO,    0, frmt, ##__VA_ARGS__)
+#define CFLogCVerbose(frmt, ...) LOG_C_MAYBE(LOG_ASYNC_VERBOSE, ddLogLevel, LOG_FLAG_VERBOSE, 0, frmt, ##__VA_ARGS__)
 
 /**
  * The THIS_FILE macro gives you an NSString of the file name.
@@ -265,7 +265,7 @@ NSString *DDExtractFileNameWithoutExtension(const char *filePath, BOOL copy);
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@interface DDLog : NSObject
+@interface CFLog : NSObject
 
 /**
  * Provides access to the underlying logging queue.
@@ -323,8 +323,8 @@ NSString *DDExtractFileNameWithoutExtension(const char *filePath, BOOL copy);
  * you should create and add a logger.
 **/
 
-+ (void)addLogger:(id <DDLogger>)logger;
-+ (void)removeLogger:(id <DDLogger>)logger;
++ (void)addLogger:(id <CFLogger>)logger;
++ (void)removeLogger:(id <CFLogger>)logger;
 
 + (void)removeAllLoggers;
 
@@ -350,10 +350,10 @@ NSString *DDExtractFileNameWithoutExtension(const char *filePath, BOOL copy);
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@protocol DDLogger <NSObject>
+@protocol CFLogger <NSObject>
 @required
 
-- (void)logMessage:(DDLogMessage *)logMessage;
+- (void)logMessage:(CFLogMessage *)logMessage;
 
 /**
  * Formatters may optionally be added to any logger.
@@ -361,8 +361,8 @@ NSString *DDExtractFileNameWithoutExtension(const char *filePath, BOOL copy);
  * If no formatter is set, the logger simply logs the message as it is given in logMessage,
  * or it may use its own built in formatting style.
 **/
-- (id <DDLogFormatter>)logFormatter;
-- (void)setLogFormatter:(id <DDLogFormatter>)formatter;
+- (id <CFLogFormatter>)logFormatter;
+- (void)setLogFormatter:(id <CFLogFormatter>)formatter;
 
 @optional
 
@@ -413,7 +413,7 @@ NSString *DDExtractFileNameWithoutExtension(const char *filePath, BOOL copy);
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@protocol DDLogFormatter <NSObject>
+@protocol CFLogFormatter <NSObject>
 @required
 
 /**
@@ -427,7 +427,7 @@ NSString *DDExtractFileNameWithoutExtension(const char *filePath, BOOL copy);
  * The formatter may also optionally filter the log message by returning nil,
  * in which case the logger will not log the message.
 **/
-- (NSString *)formatLogMessage:(DDLogMessage *)logMessage;
+- (NSString *)formatLogMessage:(CFLogMessage *)logMessage;
 
 @optional
 
@@ -440,8 +440,8 @@ NSString *DDExtractFileNameWithoutExtension(const char *filePath, BOOL copy);
  * Or if a formatter has potentially thread-unsafe code (e.g. NSDateFormatter),
  * it could possibly use these hooks to switch to thread-safe versions of the code.
 **/
-- (void)didAddToLogger:(id <DDLogger>)logger;
-- (void)willRemoveFromLogger:(id <DDLogger>)logger;
+- (void)didAddToLogger:(id <CFLogger>)logger;
+- (void)willRemoveFromLogger:(id <CFLogger>)logger;
 
 @end
 
@@ -449,7 +449,7 @@ NSString *DDExtractFileNameWithoutExtension(const char *filePath, BOOL copy);
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@protocol DDRegisteredDynamicLogging
+@protocol CFRegisteredDynamicLogging
 
 /**
  * Implement these methods to allow a file's log level to be managed from a central location.
@@ -488,12 +488,12 @@ NSString *DDExtractFileNameWithoutExtension(const char *filePath, BOOL copy);
 **/
 
 enum {
-	DDLogMessageCopyFile     = 1 << 0,
-	DDLogMessageCopyFunction = 1 << 1
+	CFLogMessageCopyFile     = 1 << 0,
+	CFLogMessageCopyFunction = 1 << 1
 };
-typedef int DDLogMessageOptions;
+typedef int CFLogMessageOptions;
 
-@interface DDLogMessage : NSObject
+@interface CFLogMessage : NSObject
 {
 
 // The public variables below can be accessed directly (for speed).
@@ -516,7 +516,7 @@ typedef int DDLogMessageOptions;
 	id tag;
 	
 	// For 3rd party extensions that manually create DDLogMessage instances.
-	DDLogMessageOptions options;
+	CFLogMessageOptions options;
 }
 
 /**
@@ -542,7 +542,7 @@ typedef int DDLogMessageOptions;
             function:(const char *)function
                 line:(int)line
                  tag:(id)tag
-             options:(DDLogMessageOptions)optionsMask;
+             options:(CFLogMessageOptions)optionsMask;
 
 /**
  * Returns the threadID as it appears in NSLog.
@@ -584,15 +584,15 @@ typedef int DDLogMessageOptions;
  * and they can ACCESS THE FORMATTER VARIABLE DIRECTLY from within their logMessage method!
 **/
 
-@interface DDAbstractLogger : NSObject <DDLogger>
+@interface CFAbstractLogger : NSObject <CFLogger>
 {
-	id <DDLogFormatter> formatter;
+	id <CFLogFormatter> formatter;
 	
 	dispatch_queue_t loggerQueue;
 }
 
-- (id <DDLogFormatter>)logFormatter;
-- (void)setLogFormatter:(id <DDLogFormatter>)formatter;
+- (id <CFLogFormatter>)logFormatter;
+- (void)setLogFormatter:(id <CFLogFormatter>)formatter;
 
 // For thread-safety assertions
 - (BOOL)isOnGlobalLoggingQueue;

@@ -1,4 +1,4 @@
-#import "DDASLLogger.h"
+#import "CFASLLogger.h"
 
 #import <libkern/OSAtomic.h>
 
@@ -17,9 +17,9 @@
 #endif
 
 
-@implementation DDASLLogger
+@implementation CFASLLogger
 
-static DDASLLogger *sharedInstance;
+static CFASLLogger *sharedInstance;
 
 /**
  * The runtime sends initialize to each class in a program exactly one time just before the class,
@@ -36,11 +36,11 @@ static DDASLLogger *sharedInstance;
 	{
 		initialized = YES;
 		
-		sharedInstance = [[DDASLLogger alloc] init];
+		sharedInstance = [[CFASLLogger alloc] init];
 	}
 }
 
-+ (DDASLLogger *)sharedInstance
++ (CFASLLogger *)sharedInstance
 {
 	return sharedInstance;
 }
@@ -62,7 +62,7 @@ static DDASLLogger *sharedInstance;
 	return self;
 }
 
-- (void)logMessage:(DDLogMessage *)logMessage
+- (void)logMessage:(CFLogMessage *)logMessage
 {
 	NSString *logMsg = logMessage->logMsg;
 	

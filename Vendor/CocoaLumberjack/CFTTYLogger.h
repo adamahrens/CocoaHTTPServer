@@ -5,7 +5,7 @@
 #import <AppKit/NSColor.h>
 #endif
 
-#import "DDLog.h"
+#import "CFLog.h"
 
 /**
  * Welcome to Cocoa Lumberjack!
@@ -31,7 +31,7 @@
  * you may choose to use only a file logger and a tty logger.
 **/
 
-@interface DDTTYLogger : DDAbstractLogger <DDLogger>
+@interface CFTTYLogger : CFAbstractLogger <CFLogger>
 {
 	NSCalendar *calendar;
 	NSUInteger calendarUnitFlags;
@@ -49,7 +49,7 @@
 	NSMutableDictionary *colorProfilesDict;
 }
 
-+ (DDTTYLogger *)sharedInstance;
++ (CFTTYLogger *)sharedInstance;
 
 /* Inherited from the DDLogger protocol:
  * 

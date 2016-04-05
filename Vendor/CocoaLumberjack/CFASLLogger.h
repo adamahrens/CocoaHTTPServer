@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <asl.h>
 
-#import "DDLog.h"
+#import "CFLog.h"
 
 /**
  * Welcome to Cocoa Lumberjack!
@@ -26,12 +26,12 @@
  * you may choose to use a file logger and a tty logger.
 **/
 
-@interface DDASLLogger : DDAbstractLogger <DDLogger>
+@interface CFASLLogger : CFAbstractLogger <CFLogger>
 {
 	aslclient client;
 }
 
-+ (DDASLLogger *)sharedInstance;
++ (CFASLLogger *)sharedInstance;
 
 // Inherited from DDAbstractLogger
 

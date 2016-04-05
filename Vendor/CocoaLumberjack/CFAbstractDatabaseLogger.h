@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-#import "DDLog.h"
+#import "CFLog.h"
 
 /**
  * Welcome to Cocoa Lumberjack!
@@ -19,7 +19,7 @@
  * and override the methods in the implementation file that are prefixed with "db_".
 **/
 
-@interface DDAbstractDatabaseLogger : DDAbstractLogger {
+@interface CFAbstractDatabaseLogger : DDAbstractLogger {
 @protected
 	NSUInteger saveThreshold;
 	NSTimeInterval saveInterval;
