@@ -11,6 +11,7 @@
 #import "HTTPAsyncFileResponse.h"
 #import "WebSocket.h"
 #import "HTTPLogging.h"
+#import "HTTPProxyResponse.h"
 
 #if ! __has_feature(objc_arc)
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
@@ -257,12 +258,9 @@ static NSMutableArray *recentNonces;
 	// You should fall through with a call to [super supportsMethod:method atPath:path]
 	// 
 	// See also: expectsRequestBodyFromMethod:atPath:
-	
-	if ([method isEqualToString:@"GET"])
-		return YES;
-	
-	if ([method isEqualToString:@"HEAD"])
-		return YES;
+    if ([method isEqualToString:@"GET"] || [method isEqualToString:@"POST"] || [method isEqualToString:@"HEAD"] || [method isEqualToString:@"OPTIONS"] || [method isEqualToString:@"PUT"] || [method isEqualToString:@"PATCH"] || [method isEqualToString:@"DELETE"]) {
+        return YES;
+    }
 		
 	return NO;
 }
@@ -1680,6 +1678,12 @@ static NSMutableArray *recentNonces;
 		
 	//	return [[[HTTPAsyncFileResponse alloc] initWithFilePath:filePath forConnection:self] autorelease];
 	}
+    
+    if ([[request headerField:@"x-forwarded-url"] length] > 0) {
+        // Need to proxy
+        NSURL *remoteURL = [NSURL URLWithString:[request headerField:@"x-forwarded-url"]];
+        return [[HTTPProxyResponse alloc] initWithLocalRequest:request remoteURLRequest:remoteURL forConnection:self];
+    }
 	
 	return nil;
 }
@@ -1927,8 +1931,8 @@ static NSMutableArray *recentNonces;
 	[response setHeaderField:@"Date" value:now];
 	
 	// Add server capability headers
-	[response setHeaderField:@"Accept-Ranges" value:@"bytes"];
-	
+	//[response setHeaderField:@"Accept-Ranges" value:@"bytes"];
+    
 	// Add optional response headers
 	if ([httpResponse respondsToSelector:@selector(httpHeaders)])
 	{
